@@ -15,18 +15,17 @@ class RuntimeConfig
   def self.voting_active?
     now = Time.now
 
-    elections_active?(now) && voting_time_with_grace_period?(now)
+    voting_period?(now) && elections_active?(now) && voting_time_with_grace_period?(now)
   end
 
   # Elections have started when vote sign in has been active at least once.
   def self.elections_started?
-    Vaalit::Config::VOTE_SIGNIN_STARTS_AT <= Time.now
+    signin_has_started?(Time.now)
   end
 
   # Elections are ongoing.
   #
-  # The first day of voting has started, but the last day of voting
-  # has not ended yet (including the grace period)
+  # The first day of voting has started,
   # and election has not terminated yet (when there are multiple voting periods).
   def self.elections_active?(now = Time.now)
     signin_has_started?(now) && now < election_terminates_at
@@ -36,8 +35,16 @@ class RuntimeConfig
     !Vaalit::Config::HTTP_BASIC_AUTH_USERNAME.nil?
   end
 
+  private_class_method def voting_period?(now)
+    signin_has_started?(now) && !signin_has_ended?(now)
+  end
+
   private_class_method def self.signin_has_started?(now)
     Vaalit::Config::VOTE_SIGNIN_STARTS_AT <= now
+  end
+
+  private_class_method def self.signin_has_ended?(now)
+    now <= Vaalit::Config::VOTE_SIGNIN_ENDS_AT
   end
 
   private_class_method def self.voting_day?(now)
