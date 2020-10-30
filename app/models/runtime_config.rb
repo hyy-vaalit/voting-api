@@ -26,9 +26,10 @@ class RuntimeConfig
   # Elections are ongoing.
   #
   # The first day of voting has started, but the last day of voting
-  # has not ended yet (including the grace period).
+  # has not ended yet (including the grace period)
+  # and election has not terminated yet (when there are multiple voting periods).
   def self.elections_active?(now = Time.now)
-    signin_has_started?(now) && now <= voting_ends_at?
+    signin_has_started?(now) && now < election_terminates_at
   end
 
   def self.http_basic_auth?
@@ -44,16 +45,16 @@ class RuntimeConfig
   end
 
   private_class_method def self.voting_time?(now)
-    Time.parse(Vaalit::Config::VOTE_SIGNIN_DAILY_OPENING_TIME) <= now &&
+    Time.parse(Vaalit::Config::VOTE_SIGNIN_DAILY_OPENING_TIME) < now &&
       now <= Time.parse(Vaalit::Config::VOTE_SIGNIN_DAILY_CLOSING_TIME)
   end
 
   private_class_method def self.voting_time_with_grace_period?(now)
     Time.parse(Vaalit::Config::VOTE_SIGNIN_DAILY_OPENING_TIME) <= now &&
-      now <= Time.parse(Vaalit::Config::VOTE_SIGNIN_DAILY_CLOSING_TIME) + Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES
+      now < Time.parse(Vaalit::Config::VOTE_SIGNIN_DAILY_CLOSING_TIME) + Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES
   end
 
-  private_class_method def self.voting_ends_at?
-    Vaalit::Config::VOTE_SIGNIN_ENDS_AT + Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES
+  private_class_method def self.election_terminates_at
+    Vaalit::Config::ELECTION_TERMINATES_AT + Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES
   end
 end

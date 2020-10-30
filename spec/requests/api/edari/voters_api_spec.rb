@@ -28,6 +28,11 @@ describe Vaalit::Voters::VotersApi do
     context "when current user is a service user" do
       let(:user) { FactoryBot.build(:service_user) }
 
+      before do
+        allow(RuntimeConfig).to receive(:elections_started?).and_return true
+        allow(RuntimeConfig).to receive(:elections_active?).and_return true
+      end
+
       it { should be_able_to(:access, :voters) }
     end
   end
@@ -36,6 +41,8 @@ describe Vaalit::Voters::VotersApi do
     before do
       allow_any_instance_of(Vaalit::JwtHelpers)
         .to receive(:current_service_user) { ServiceUser.new }
+      allow(RuntimeConfig).to receive(:elections_started?).and_return(true)
+      allow(RuntimeConfig).to receive(:elections_active?).and_return(true)
 
       @election = FactoryBot.create :election, :edari_election
       @faculty = FactoryBot.create :faculty

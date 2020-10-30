@@ -38,6 +38,7 @@ group :development, :test do
   gem 'faker'
   gem 'database_cleaner'
   gem 'solargraph'
+  gem 'timecop'
 end
 
 group :development do

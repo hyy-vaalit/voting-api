@@ -2,6 +2,26 @@ require 'rails_helper'
 
 RSpec.describe RuntimeConfig, type: :model do
 
+  before do
+    Timecop.freeze "2015-11-02 09:00:00 +0200"
+    stub_const("Vaalit::Config::VOTE_SIGNIN_STARTS_AT", 3.days.ago)
+    stub_const("Vaalit::Config::VOTE_SIGNIN_ENDS_AT", 1.day.from_now)
+    stub_const("Vaalit::Config::ELECTION_TERMINATES_AT", 1.week.from_now)
+    stub_const("Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES", 5.minutes)
+    stub_const("Vaalit::Config::VOTE_SIGNIN_DAILY_OPENING_TIME", "9:00")
+    stub_const("Vaalit::Config::VOTE_SIGNIN_DAILY_CLOSING_TIME", "18:00")
+  end
+
+  after do
+    hide_const("Vaalit::Config::VOTE_SIGNIN_STARTS_AT")
+    hide_const("Vaalit::Config::VOTE_SIGNIN_ENDS_AT")
+    hide_const("Vaalit::Config::ELECTION_TERMINATES_AT")
+    hide_const("Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES")
+    hide_const("Vaalit::Config::VOTE_SIGNIN_DAILY_OPENING_TIME")
+    hide_const("Vaalit::Config::VOTE_SIGNIN_DAILY_CLOSING_TIME")
+    Timecop.return
+  end
+
   context "voting has not started yet" do
     before do
       stub_const("Vaalit::Config::VOTE_SIGNIN_STARTS_AT", 1.hour.from_now)
@@ -56,7 +76,7 @@ RSpec.describe RuntimeConfig, type: :model do
     before do
       stub_const("Vaalit::Config::VOTE_SIGNIN_STARTS_AT", 3.days.ago)
       stub_const("Vaalit::Config::VOTE_SIGNIN_ENDS_AT", 1.day.from_now)
-      stub_const("Vaalit::Config::Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES", 5.minutes)
+      stub_const("Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES", 5.minutes)
     end
 
     context "grace period is active" do
@@ -108,15 +128,16 @@ RSpec.describe RuntimeConfig, type: :model do
 
   end
 
-  context "voting has ended" do
+  context "first period of voting has ended" do
     before do
       stub_const("Vaalit::Config::VOTE_SIGNIN_STARTS_AT", 3.days.ago)
-      stub_const("Vaalit::Config::Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES", 5.minutes)
+      stub_const("Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES", 5.minutes)
     end
 
     context "grace period is active" do
       before do
         stub_const("Vaalit::Config::VOTE_SIGNIN_ENDS_AT", 299.seconds.ago)
+        stub_const("Vaalit::Config::ELECTION_TERMINATES_AT", 1.week.from_now)
       end
 
       it "vote signin is not active" do
@@ -139,6 +160,60 @@ RSpec.describe RuntimeConfig, type: :model do
     context "grace period is over" do
       before do
         stub_const("Vaalit::Config::VOTE_SIGNIN_ENDS_AT", 300.seconds.ago)
+        stub_const("Vaalit::Config::ELECTION_TERMINATES_AT", 300.seconds.ago)
+      end
+
+      it "vote signin is not active" do
+        expect(RuntimeConfig.vote_signin_active?).to be false
+      end
+
+      it "voting is not active" do
+        expect(RuntimeConfig.voting_active?).to be false
+      end
+
+      it "elections are not active" do
+        expect(RuntimeConfig.elections_active?).to be false
+      end
+
+      it "elections have started" do
+        expect(RuntimeConfig.elections_started?).to be true
+      end
+    end
+  end
+
+  context "second period of voting has ended" do
+    before do
+      stub_const("Vaalit::Config::VOTE_SIGNIN_STARTS_AT", 3.days.ago)
+      stub_const("Vaalit::Config::VOTING_GRACE_PERIOD_MINUTES", 5.minutes)
+    end
+
+    context "grace period is active" do
+      before do
+        stub_const("Vaalit::Config::VOTE_SIGNIN_ENDS_AT", 299.seconds.ago)
+        stub_const("Vaalit::Config::ELECTION_TERMINATES_AT", 299.second.ago)
+      end
+
+      it "vote signin is not active" do
+        expect(RuntimeConfig.vote_signin_active?).to be false
+      end
+
+      it "voting is active" do
+        expect(RuntimeConfig.voting_active?).to be true
+      end
+
+      it "elections are active" do
+        expect(RuntimeConfig.elections_active?).to be true
+      end
+
+      it "elections have started" do
+        expect(RuntimeConfig.elections_started?).to be true
+      end
+    end
+
+    context "grace period is over" do
+      before do
+        stub_const("Vaalit::Config::VOTE_SIGNIN_ENDS_AT", 301.seconds.ago)
+        stub_const("Vaalit::Config::ELECTION_TERMINATES_AT", 301.second.ago)
       end
 
       it "vote signin is not active" do
