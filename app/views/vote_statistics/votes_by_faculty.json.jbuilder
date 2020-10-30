@@ -7,7 +7,11 @@ json.children do
     json.array! stats do |faculty|
       json.name faculty["name"]
       json.voter_count faculty["voter_count"]
-      json.voted_count faculty["voted_count"]
+      if RuntimeConfig.elections_active?
+        json.vote_count 0
+      else
+        json.vote_count faculty["vote_count"]
+      end
       json.percentage faculty["percentage"].to_f
     end
   end

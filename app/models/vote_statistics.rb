@@ -78,7 +78,7 @@ class VoteStatistics
       ), voted_by_faculty as (
          SELECT
             faculties.id AS faculty_id,
-            count(*) as voted_count
+            count(*) as vote_count
           FROM voters
           INNER JOIN faculties ON faculties.id = voters.faculty_id
           INNER JOIN voting_rights
@@ -91,8 +91,8 @@ class VoteStatistics
         faculties.id,
         faculties.name,
         voter_count,
-        COALESCE(voted_count, 0) AS voted_count,
-        round(100.0 * COALESCE(voted_count, 0) / voter_count, 2) AS percentage
+        COALESCE(vote_count, 0) AS vote_count,
+        round(100.0 * COALESCE(vote_count, 0) / voter_count, 2) AS percentage
       FROM
         faculties
       LEFT OUTER JOIN
