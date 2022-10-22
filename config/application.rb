@@ -27,13 +27,10 @@ module HyyVotingApi
       end
     end
 
-    config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
-    config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
-
     config.active_job.queue_adapter = :delayed_job
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 5.0
+    # config.load_defaults 5.0
 
     # Configuration for the application, engines, and railties goes here.
     #

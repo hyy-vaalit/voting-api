@@ -31,7 +31,7 @@ module Vaalit
       end
       desc 'Grant a new session JWT'
       post do
-        processor = SignInTokenProcessor.new URI.decode(params[:token])
+        processor = SignInTokenProcessor.new URI.decode_www_form_component(params[:token])
 
         if processor.valid? && processor.session_token.valid?
           present processor.session_token, with: Entities::SessionToken

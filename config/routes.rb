@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   get '/_environment.js', to: 'public#environment'
 
   # Grape API in app/api/
-  mount API => '/'
+  mount Api => '/'
 
   # SAML Authentication from the Haka federation
   namespace :haka do

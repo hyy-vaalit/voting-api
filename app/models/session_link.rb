@@ -40,6 +40,6 @@ class SessionLink
   end
 
   def url
-    "#{Vaalit::Public::SITE_ADDRESS}/#/sign-in?token=#{URI.encode(jwt)}"
+    "#{Vaalit::Public::SITE_ADDRESS}/#/sign-in?token=#{URI.encode_www_form_component(jwt)}"
   end
 end

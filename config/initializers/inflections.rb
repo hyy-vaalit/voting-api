@@ -18,5 +18,5 @@
 # Grape with Rails >=6 fails with "uninitialized constant API"
 # https://github.com/ruby-grape/grape#rails-60
 ActiveSupport::Inflector.inflections(:en) do |inflect|
-  inflect.acronym 'API'
+  # inflect.acronym 'API'
 end
