@@ -52,6 +52,9 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "hyy_voting_api_production"
 
+  # Send mail using AWS SES
+  config.action_mailer.delivery_method = :aws_sdk
+
   config.action_mailer.perform_caching = false
 
   # Ignore bad email addresses and do not raise email delivery errors.
@@ -78,5 +81,6 @@ Rails.application.configure do
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
 
-  config.action_mailer.delivery_method = :aws_sdk
+  # Do not dump schema after migrations.
+  config.active_record.dump_schema_after_migration = false
 end
