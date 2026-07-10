@@ -11,7 +11,7 @@
 #   docker compose build api
 services:
   db:
-    image: postgres:17
+    image: postgres:18
     environment:
       POSTGRES_PASSWORD: postgres
     healthcheck:
@@ -19,7 +19,10 @@ services:
       interval: 2s
       retries: 15
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # postgres:18 images moved the mount point up a level (PGDATA is
+      # /var/lib/postgresql/18/docker); mounting .../data would leave the
+      # actual data in an anonymous volume.
+      - pgdata:/var/lib/postgresql
 
   api:
     build: .
