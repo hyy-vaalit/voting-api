@@ -48,6 +48,11 @@ end
 
 module HyyVotingApi
   class Application < Rails::Application
+    # Historically this app opted in to new framework defaults one by one
+    # (via new_framework_defaults.rb, removed once adopted) and never had
+    # a load_defaults line. Since Rails 8.1.3 the full 8.1 defaults are on.
+    config.load_defaults 8.1
+
     # Read ENV directly: this file is loaded before the initializers.
     # 000_config.rb fails the boot if only one of the two vars is set.
     unless ENV['HTTP_BASIC_AUTH_USERNAME'].to_s.empty?
@@ -55,8 +60,6 @@ module HyyVotingApi
                             ENV['HTTP_BASIC_AUTH_USERNAME'],
                             ENV['HTTP_BASIC_AUTH_PASSWORD']
     end
-
-    config.active_support.cache_format_version = 7.1
 
     config.active_job.queue_adapter = :delayed_job
 
