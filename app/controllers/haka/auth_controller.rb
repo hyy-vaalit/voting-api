@@ -6,8 +6,7 @@ module Haka
     # Initiates a new SAML sign in request
     def new
       request = OneLogin::RubySaml::Authrequest.new
-      # The IdP SSO URL is another host; load_defaults 8.1 turned on the
-      # open-redirect protection (raise_on_open_redirects, Rails 7.0 default).
+      # The IdP SSO URL is a third party host
       redirect_to request.create(saml_settings), allow_other_host: true
     end
 

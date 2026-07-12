@@ -48,9 +48,6 @@ end
 
 module HyyVotingApi
   class Application < Rails::Application
-    # Historically this app opted in to new framework defaults one by one
-    # (via new_framework_defaults.rb, removed once adopted) and never had
-    # a load_defaults line. Since Rails 8.1.3 the full 8.1 defaults are on.
     config.load_defaults 8.1
 
     # Read ENV directly: this file is loaded before the initializers.
