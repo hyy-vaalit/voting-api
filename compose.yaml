@@ -3,12 +3,13 @@
 #   docker compose run --rm api rake db:runts  # recreate db with seed data
 #
 # Test suite:
-#   docker compose run --rm -e RAILS_ENV=test \
-#     -e DATABASE_URL=postgres://postgres:postgres@db/hyy-voting-api_test \
-#     api sh -c 'bin/rails db:create db:schema:load && bundle exec rspec'
+#   docker compose run --rm test
 #
-# App code is baked into the image — rebuild after code changes:
-#   docker compose build api
+# Code is bind-mounted, so no rebuild after code changes; rebuild only after
+# Gemfile/Ruby changes: docker compose build
+#
+# Production is not a compose service: `docker build -t voting-api .` builds
+# the deployable image (see Dockerfile), configured entirely via deploy env.
 services:
   db:
     image: postgres:17
@@ -22,17 +23,36 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   api:
-    build: .
+    build: &build
+      context: .
+      target: dev
+      args:
+        BUNDLE_WITHOUT: ""
     # Everything else comes from .env / .env.test via dotenv inside the
     # container; DATABASE_URL overrides the socket-based database.yml.
     environment:
       RAILS_ENV: development
       DATABASE_URL: postgres://postgres:postgres@db/hyy-voting-api_development
-      # DatabaseCleaner refuses non-localhost DATABASE_URLs; "db" is our own
-      # compose service, not a remote database. Only used by the test suite.
-      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: "true"
+    volumes:
+      - .:/app
     ports:
       - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  test:
+    build: *build
+    profiles: ["test"]
+    command: sh -c 'bin/rails db:prepare && bundle exec rspec'
+    environment:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@db/hyy-voting-api_test
+      # DatabaseCleaner refuses non-localhost DATABASE_URLs; "db" is our own
+      # compose service, not a remote database.
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: "true"
+    volumes:
+      - .:/app
     depends_on:
       db:
         condition: service_healthy
