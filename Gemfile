@@ -1,8 +1,8 @@
 source 'https://rubygems.org'
 
-ruby '3.4.6' # This is for Heroku, it's defined also in .ruby-version for RVM
+ruby '4.0.5' # This is for Heroku, it's defined also in .ruby-version for RVM
 
-gem 'rails', '7.2.2.2'
+gem 'rails', '8.1.3'
 
 gem 'puma' # application server
 gem 'grape' # API

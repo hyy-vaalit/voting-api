@@ -48,6 +48,8 @@ end
 
 module HyyVotingApi
   class Application < Rails::Application
+    config.load_defaults 8.1
+
     # Read ENV directly: this file is loaded before the initializers.
     # 000_config.rb fails the boot if only one of the two vars is set.
     unless ENV['HTTP_BASIC_AUTH_USERNAME'].to_s.empty?
@@ -55,8 +57,6 @@ module HyyVotingApi
                             ENV['HTTP_BASIC_AUTH_USERNAME'],
                             ENV['HTTP_BASIC_AUTH_PASSWORD']
     end
-
-    config.active_support.cache_format_version = 7.1
 
     config.active_job.queue_adapter = :delayed_job
 

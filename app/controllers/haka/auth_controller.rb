@@ -6,7 +6,8 @@ module Haka
     # Initiates a new SAML sign in request
     def new
       request = OneLogin::RubySaml::Authrequest.new
-      redirect_to(request.create(saml_settings))
+      # The IdP SSO URL is a third party host
+      redirect_to request.create(saml_settings), allow_other_host: true
     end
 
     # Receives the SAML assertion after Haka sign in
